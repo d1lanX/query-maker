@@ -5,30 +5,25 @@
   import LeftSideContainer from '$components/LeftSideContainer.svelte';
   import QueryWriter from '$components/QueryWriter.svelte';
   import Query from '$components/Query.svelte';
-
-  import type { RecentQuery } from '$lib/types';
   import { onMount } from 'svelte';
+  import { globalState } from '$lib/state.svelte';
+  import type { RecentQuery } from '$lib/types';
 
-  let recentQueries: Array<RecentQuery> = $state([]);
   let columnsHTML: string = $state(
     '<small class="p-4 text-gray-600">importa primero un archivo para ver sus columnas</small>',
   );
   let excelData: any = $state();
 
   onMount(() => {
-    if (localStorage.getItem('consecut')) {
-      localStorage.setItem('consecut', '1');
-    }
-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i) || '';
-      if (!key.includes('consecut')) {
+      if (!key.includes('query')) {
         continue;
       }
 
       const item = localStorage.getItem(key) || '';
       const json = JSON.parse(item);
-      recentQueries = [...recentQueries, json];
+      globalState.recentQueries.set(key, json);
     }
   });
 
@@ -55,6 +50,7 @@
     const matches: any = sqlQuery.match(/\$\d|#\d/g);
 
     const query: RecentQuery = {
+      consecutivo: 0,
       preview: '',
       content: [],
     };
@@ -85,13 +81,16 @@
       query.content.push(currentQuery);
     });
 
-    recentQueries = [...recentQueries, query];
-
     /* Se obtiene el consecutivo actual */
-    const consecut = Number(localStorage.getItem('consecut')) || 1;
+    const consecut = Number(localStorage.getItem('consecut') || 0);
+    const nuevoConsecutivo = consecut + 1;
+    query.consecutivo = nuevoConsecutivo;
+
+    globalState.recentQueries.set(`query_${nuevoConsecutivo}`, query);
 
     /* Para guardar la query en recientes */
-    localStorage.setItem(`${consecut + 1}`, JSON.stringify(query));
+    localStorage.setItem(`query_${nuevoConsecutivo}`, JSON.stringify(query));
+    localStorage.setItem('consecut', `${nuevoConsecutivo}`);
   }
 </script>
 
@@ -111,8 +110,10 @@
     {#snippet queryWriter()}
       <QueryWriter {excelData} onQueryReady={buidAllQueries} />
     {/snippet}
-    {#each recentQueries as recent}
+    {#each [...globalState.recentQueries] as [key, recent]}
       <Query queryDetails={recent} />
+    {:else}
+      <small class="p-4 text-gray-600">crea una nueva query para visualizarla aqui!</small>
     {/each}
   </RightSideContainer>
 </MainContainer>

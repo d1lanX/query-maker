@@ -18,7 +18,7 @@
       return;
     }
 
-    if (!inputValue.match(/(\$\d)+/g)) {
+    if (!inputValue.match(/(\$\d|#\d)+/g)) {
       alert('Escribe la query utilizando algunas de las columnas ($0, $1, $2, ... $69)');
       return;
     }
