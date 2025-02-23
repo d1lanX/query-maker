@@ -51,8 +51,8 @@
   function buidAllQueries(queryString: any) {
     let sqlQuery: string = queryString;
 
-    /* Para encontrar los $numero en la query */
-    const matches: any = sqlQuery.match(/(\$\d)/g);
+    /* Para encontrar los $numeros en la query */
+    const matches: any = sqlQuery.match(/\$\d|#\d/g);
 
     const query: RecentQuery = {
       preview: '',
@@ -68,10 +68,17 @@
       }
 
       for (let match of matches) {
-        if (isNaN(column[match.replace('$', '')])) {
-          currentQuery = currentQuery.replace(match, `'${column[Number(match.replace('$', ''))]}'`);
-        } else {
-          currentQuery = currentQuery.replace(match, `${column[Number(match.replace('$', ''))]}`);
+        const tipoColumna = (match as string).replaceAll(/\d/g, '');
+        const indexColumna = (match as string).replaceAll(/\$\d|#\d/g, '');
+
+        if (tipoColumna === '#') {
+          currentQuery = currentQuery.replace(match, `${column[+indexColumna]}`);
+          continue;
+        }
+
+        if (tipoColumna === '$') {
+          currentQuery = currentQuery.replace(match, `'${column[+indexColumna]}'`);
+          continue;
         }
       }
 
