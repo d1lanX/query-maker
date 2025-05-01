@@ -65,7 +65,7 @@
 
       for (let match of matches) {
         const tipoColumna = (match as string).replaceAll(/\d/g, '');
-        const indexColumna = (match as string).replaceAll(/\$\d|#\d/g, '');
+        const indexColumna = (match as string).replaceAll(/\$|#/g, '');
 
         if (tipoColumna === '#') {
           currentQuery = currentQuery.replace(match, `${column[+indexColumna]}`);
@@ -93,6 +93,10 @@
     localStorage.setItem('consecut', `${nuevoConsecutivo}`);
   }
 </script>
+
+<svelte:head>
+  <title>query maker</title>
+</svelte:head>
 
 <MainContainer>
   <LeftSideContainer>
