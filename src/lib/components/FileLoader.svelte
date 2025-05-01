@@ -51,9 +51,11 @@
 
   function readCsv(data: string) {
     const rawData: string[][] = [];
-    for (let column of data.split('\n')) {
-      if (column == '') continue;
-      rawData.push(column.split(';'));
+    let separador = ';';
+    for (let row of data.split('\n')) {
+      if (row == '') continue;
+      separador = row.includes(',') ? ',' : ';';
+      rawData.push(row.split(separador));
     }
     onData(rawData);
   }
@@ -62,7 +64,7 @@
 <section class="mt-5">
   <label
     for="file"
-    class="border p-2 cursor-pointer rounded-lg text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
+    class="border py-12 px-2 cursor-pointer rounded-lg text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
   >
     {filename ? filename : 'cargar archivo csv o excel'}
     <CloudUpload />
