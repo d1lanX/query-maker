@@ -56,7 +56,7 @@
     };
 
     excelData.forEach((column: [], index: number) => {
-      let currentQuery = sqlQuery;
+      let currentQuery: string = sqlQuery;
 
       if (index === 0) {
         query.preview = sqlQuery;
@@ -67,19 +67,23 @@
         const tipoColumna = (match as string).replaceAll(/\d/g, '');
         const indexColumna = (match as string).replaceAll(/\$|#/g, '');
 
+        const dato = (column[+indexColumna] as string).replace(/\\r|\r/g, '');
+
         if (tipoColumna === '#') {
-          currentQuery = currentQuery.replace(match, `${column[+indexColumna]}`);
+          currentQuery = currentQuery.replace(match, dato);
           continue;
         }
 
         if (tipoColumna === '$') {
-          currentQuery = currentQuery.replace(match, `'${column[+indexColumna]}'`);
+          currentQuery = currentQuery.replace(match, `'${dato}'`);
           continue;
         }
       }
 
       query.content.push(currentQuery);
     });
+
+    console.log('Query Content:', query.content);
 
     /* Se obtiene el consecutivo actual */
     const consecut = Number(localStorage.getItem('consecut') || 0);
