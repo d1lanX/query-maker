@@ -7,6 +7,7 @@
 
   let filename: string | null = $state(null);
   let separador: string = $state(';');
+  let draggingOver: boolean = $state(false);
 
   async function validateFile(file: File) {
     if (!file) {
@@ -31,6 +32,8 @@
       const data = await readFile<string>({ file, readAs: 'readAsText' });
       readCsv(data);
     }
+
+    draggingOver = false;
   }
 
   function readFile<T extends string | ArrayBuffer>(params: ReadFileOptions): Promise<T> {
@@ -64,10 +67,15 @@
     class="border-dashed border-2 border-gray-300 rounded-lg mt-4 p-12 text-center text-gray-600 cursor-pointer hover:bg-gray-100"
     maxFiles={1}
     accept=".xlsx, .csv"
+    containerClasses="border-blue-500"
     on:drop={(e) => validateFile(e.detail.acceptedFiles[0])}
+    on:dragenter={() => (draggingOver = true)}
+    on:dragleave={() => (draggingOver = false)}
     ><label
       for="file"
-      class="text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
+      class="text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100 {draggingOver
+        ? 'text-blue-500'
+        : ''}"
     >
       {filename ? filename : 'cargar archivo csv o excel'}
       <CloudUpload />
