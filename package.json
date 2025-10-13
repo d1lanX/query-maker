@@ -25,6 +25,7 @@
 	"type": "module",
 	"dependencies": {
 		"lucide-svelte": "^0.475.0",
+		"svelte-file-dropzone": "^2.0.9",
 		"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/xlsx-0.20.1.tgz"
 	}
 }

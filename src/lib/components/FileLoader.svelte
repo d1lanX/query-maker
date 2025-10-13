@@ -1,14 +1,14 @@
 <script lang="ts">
+  import Dropzone from 'svelte-file-dropzone';
   import { CloudUpload } from 'lucide-svelte';
   import type { ReadFileOptions } from '$lib/types';
   import { read, utils } from 'xlsx';
   let { onData } = $props();
 
   let filename: string | null = $state(null);
+  let separador: string = $state(';');
 
-  async function validateFile(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0];
-
+  async function validateFile(file: File) {
     if (!file) {
       alert('Por favor ingresa un archivo');
       return;
@@ -51,10 +51,8 @@
 
   function readCsv(data: string) {
     const rawData: string[][] = [];
-    let separador = ';';
     for (let row of data.split('\n')) {
       if (row == '') continue;
-      separador = row.includes(',') ? ',' : ';';
       rawData.push(row.split(separador));
     }
     onData(rawData);
@@ -62,19 +60,28 @@
 </script>
 
 <section class="mt-5">
-  <label
-    for="file"
-    class="border py-12 px-2 cursor-pointer rounded-lg text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
-  >
-    {filename ? filename : 'cargar archivo csv o excel'}
-    <CloudUpload />
-  </label>
-  <input
-    type="file"
-    name="file"
-    id="file"
-    class="sr-only"
-    onchange={validateFile}
+  <Dropzone
+    class="border-dashed border-2 border-gray-300 rounded-lg mt-4 p-12 text-center text-gray-600 cursor-pointer hover:bg-gray-100"
+    maxFiles={1}
     accept=".xlsx, .csv"
-  />
+    on:drop={(e) => validateFile(e.detail.acceptedFiles[0])}
+    ><label
+      for="file"
+      class="text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
+    >
+      {filename ? filename : 'cargar archivo csv o excel'}
+      <CloudUpload />
+    </label></Dropzone
+  >
+  <fieldset>
+    <legend class="text-gray-600 mt-4">separador</legend>
+    <label>
+      <input
+        type="text"
+        id="separador"
+        class="border p-2 text-gray-600 w-16"
+        bind:value={separador}
+      />
+    </label>
+  </fieldset>
 </section>
