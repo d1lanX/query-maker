@@ -8,6 +8,11 @@
     let filename: string | null = $state(null);
     let separador: string = $state(';');
     let draggingOver: boolean = $state(false);
+    let callback: string = $state(`
+    function callback(data) {
+        console.log(data);
+    }
+    `.trim());
 
     async function validateFile(file: File) {
         if (!file) {
@@ -19,7 +24,7 @@
         const csvFile = file.name.endsWith('.csv');
 
         if (!(excelFile || csvFile)) {
-            alert('El archivo no tiene una extension válida');
+            alert('El archivo no tiene una extension v�lida');
             return;
         }
 
@@ -29,6 +34,7 @@
             const data = await readFile<ArrayBuffer>({ file, readAs: 'readAsArrayBuffer' });
             readExcel(data);
         } else {
+            separador = prompt('el csv se separa por: ', ';') || ';';
             const data = await readFile<string>({ file, readAs: 'readAsText' });
             readCsv(data);
         }
@@ -64,7 +70,7 @@
 
 <section class="mt-5">
     <Dropzone
-        class="border-dashed border-2 border-gray-300 rounded-lg mt-4 p-12 text-center text-gray-600 cursor-pointer hover:bg-gray-100"
+        class="border-dashed border-2 border-gray-300 rounded-lg mt-4 p-12 text-center text-gray-600 cursor-pointer hover:bg-gray-100 {draggingOver? 'border-blue-700': ''}"
         maxFiles={1}
         accept=".xlsx, .csv"
         containerClasses="border-blue-500"
@@ -73,23 +79,22 @@
         on:dragleave={() => (draggingOver = false)}
         ><label
             for="file"
-            class="text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100 {draggingOver
-                ? 'text-blue-500'
-                : ''}"
+            class="text-gray-600 flex justify-center gap-4 items-center hover:bg-gray-100"
         >
             {filename ? filename : 'cargar archivo csv o excel'}
             <CloudUpload />
         </label></Dropzone
     >
     <fieldset>
-        <legend class="text-gray-600 mt-4">separador</legend>
+        <legend class="text-gray-600 mt-4">callback:</legend>
         <label>
-            <input
+            <!-- <input
                 type="text"
                 id="separador"
                 class="border p-2 text-gray-600 w-16"
                 bind:value={separador}
-            />
+            /> -->
+            <textarea name="callback" id="callback" bind:value={callback} class="border p-2 text-gray-600 w-full"></textarea>
         </label>
     </fieldset>
 </section>
