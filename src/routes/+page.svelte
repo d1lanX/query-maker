@@ -5,9 +5,14 @@
     import LeftSideContainer from '$components/LeftSideContainer.svelte';
     import QueryWriter from '$components/QueryWriter.svelte';
     import Query from '$components/Query.svelte';
+    import CallbackDialog from '$components/CallbackDialog.svelte';
     import { onMount } from 'svelte';
     import { globalState } from '$lib/state.svelte';
     import type { RecentQuery } from '$lib/types';
+
+    let callbackFn: (row: any[], index: number) => any[] = $state(
+        (row: any[], index: number) => row,
+    );
 
     let columnsHTML: string = $state(
         '<small class="p-4 text-gray-600">importa primero un archivo para ver sus columnas</small>',
@@ -44,10 +49,16 @@
     }
 
     function buidAllQueries(queryString: any) {
+        if (!globalState.isCallbackValid) {
+            console.log(callbackFn);
+            alert('Por favor valida el callback');
+            return;
+        }
+
         let sqlQuery: string = queryString;
 
         /* Para encontrar los $numeros en la query */
-        const matches: any = sqlQuery.match(/\$\d|#\d/g);
+        const matches = sqlQuery.match(/\$\d|#\d/g) || [];
 
         const query: RecentQuery = {
             consecutivo: 0,
@@ -55,7 +66,7 @@
             content: [],
         };
 
-        excelData.forEach((column: [], index: number) => {
+        excelData.forEach((row: any, index: number) => {
             let currentQuery: string = sqlQuery;
 
             if (index === 0) {
@@ -63,11 +74,17 @@
                 return;
             }
 
+            try {
+                row = callbackFn(row, index);
+            } catch (error) {
+                console.error('Error en callback en la fila', index, error);
+            }
+
             for (let match of matches) {
                 const tipoColumna = (match as string).replaceAll(/\d/g, '');
                 const indexColumna = (match as string).replaceAll(/\$|#/g, '');
 
-                const dato = (String(column[+indexColumna] || '') as string).replace(/\\r|\r/g, '');
+                const dato = (String(row[+indexColumna] || '') as string).replace(/\\r|\r/g, '');
 
                 if (tipoColumna === '#') {
                     currentQuery = currentQuery.replace(match, dato);
@@ -103,7 +120,11 @@
 <MainContainer>
     <LeftSideContainer>
         {#snippet fileReader()}
-            <FileLoader onData={setConvertedData} />
+            <FileLoader onData={setConvertedData}>
+                {#snippet callbackDialog()}
+                    <CallbackDialog bind:callbackFn />
+                {/snippet}
+            </FileLoader>
         {/snippet}
         {#snippet htmlColumns()}
             <section class="grid grid-cols-2 gap-2 p-8 my-5">

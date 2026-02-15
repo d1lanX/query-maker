@@ -28,6 +28,26 @@
         >
     </details>
     <button
+        class="bg-gray-200 p-4 hover:bg-blue-600 hover:text-white absolute right-14 top-0"
+        aria-label="copy preview"
+        onclick={() => navigator.clipboard.writeText(queryDetails.preview)}
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+    </button>
+    <button
         class="bg-gray-300 p-4 hover:bg-red-600 hover:text-white absolute right-0 top-0"
         aria-label="remove"
         data-index={queryDetails.consecutivo}
